@@ -16,7 +16,7 @@ export const initializeComponentRegistry = async () => {
     });
     
     // Import widgets from the submission widgets folder
-    const submissionWidgetsModules = import.meta.glob('./submission-widgets/*.jsx', { eager: true });
+    const submissionWidgetsModules = import.meta.glob('./submission-widgets/MyWidget.jsx', { eager: true });
     Object.entries(submissionWidgetsModules).forEach(([path, module]) => {
       const component = module.default;
       const componentName = component.name;

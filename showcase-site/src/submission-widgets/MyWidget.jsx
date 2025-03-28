@@ -1,88 +1,78 @@
+// real one <3
 import React, { useState , useEffect} from 'react';
 import ICAL from "ical.js";
 import axios from "axios";
 
 
 const MyWidget = () => {
+  const [ friends, setFriends ] = useState([]);
+  const [ name, setName ] = useState("");
   const [ file, setFile ] = useState(null);
-  const [ progress, setProgress ] = useState({started: false, pc: 0});
-  const [ msg, setMsg ] = useState("");
+  const [ url, setURL ] = useState("");
   const [ cal, setCal ] = useState("");
+  const [ msg, setMsg ] = useState("");
 
-  useEffect(() => {
-    if (cal) {
-      showTimetable();
-    }
-  }, [cal]);
-
-  function showTimetable() {
-    console.log("yes");
-    if (!cal) {
-      return;
-    }
-    var jcalData = ICAL.parse(cal);
-    var comp = new ICAL.Component(jcalData);
-    var vevent = comp.getFirstSubcomponent("vevent");
-    var event = new ICAL.Event(vevent);
-    var summary = event.summary;
-    console.log(summary);
-  }
   function handleUpload() {
-    if (!file) {
-      setMsg("no file selected");
-      return;
+    if ((!file && !url) || !name) {
+      setMsg("Please add a name and upload a file/url!");
     }
+    setMsg("");
     const fd = new FormData();
     fd.append('file', file);
 
-    setMsg("Uploading...");
-    setProgress(prevState => {
-      return {...prevState, started:true}
-    })
-    axios.post('http://httpbin.org/post', fd, {
-      onUploadProgress: (progressEvent) => { setProgress(prevState => { 
-      return {...prevState, pc: progressEvent.progress*100}
-      }) },
-      headers: {
-        "Custom-Header": "value",
-      }
-    })
-    .then(res => {
-      setMsg("Upload successfull");
-      setCal(res.data.files.file.toString());
-      
-      //console.log(res.data.files.file);
-    })
-    .catch(err => {
-      setMsg("Error");
-      console.error(err);
-    });
+
   }
-  //console.log(mycal);
-  //
 
   
-
   return (
-    <div className="p-6 mx-auto bg-white rounded-xl shadow-lg max-w-[900px]">
-      <div className="text-center space-y-4">
-        <h2 className="text-xl font-bold text-gray-800">Upload file</h2>
+    <div className = "max-w-4xl mx-auto p-6 bg-gray-900 text-white rounded-lg shadow-lg">
+      <h1 className = "font-bold text-center">Campus Calendar G1</h1>
+      <div className="flex mb-4">
+        <input
+          type = "text"
+          placeholder = "friend name here"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="flex-1 p-2 rounded text-white"
+        />
+        <input
+          type = "text"
+          placeholder = "ical url"
+          value={name}
+          onChange={(e) => setURL(e.target.value)}
+          className="flex-1 p-2 rounded bg-pink text-white"
+        />
 
-        <div className="text-2xl font-bold text-blue-600">
-          {msg}
-        </div>
+        <input
+          onChange = {(e) => {setFile(e.target.files[0])} }
+          type = "file"
+          accept=".ics"
+          className="p-2 bg-blue-100 rounded-full hover:bg-blue-200 transition-colors"
+        />
 
-        <div className="flex justify-center">
-          <input onChange ={(e) => {setFile(e.target.files[0])} } type="file" accept=".ics" className ="p-2 bg-blue-100 rounded-full hover:bg-blue-200 transition-colors" />
-          <button onClick={handleUpload} className="p-2 bg-blue-100 rounded-full hover:bg-blue-200 transition-colors">
-            Upload ICS file
-          </button>
-        </div>
+        <button
+          onClick={handleUpload}
+          className="ml-2 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
+          Upload ICS file
+        </button>
       </div>
+
+      {msg && <p className="text-red-400 mb-2">{msg}</p>}
     </div>
   );
 };
 
 export default MyWidget;
 
-
+/* Project Plan
+ *
+ * 
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ */
