@@ -7,7 +7,26 @@ const MyWidget = () => {
   const [ file, setFile ] = useState(null);
   const [ progress, setProgress ] = useState({started: false, pc: 0});
   const [ msg, setMsg ] = useState("");
+  const [ cal, setCal ] = useState("");
 
+  useEffect(() => {
+    if (cal) {
+      showTimetable();
+    }
+  }, [cal]);
+
+  function showTimetable() {
+    console.log("yes");
+    if (!cal) {
+      return;
+    }
+    var jcalData = ICAL.parse(cal);
+    var comp = new ICAL.Component(jcalData);
+    var vevent = comp.getFirstSubcomponent("vevent");
+    var event = new ICAL.Event(vevent);
+    var summary = event.summary;
+    console.log(summary);
+  }
   function handleUpload() {
     if (!file) {
       setMsg("no file selected");
@@ -30,7 +49,9 @@ const MyWidget = () => {
     })
     .then(res => {
       setMsg("Upload successfull");
-      console.log(res.data);
+      setCal(res.data.files.file.toString());
+      
+      //console.log(res.data.files.file);
     })
     .catch(err => {
       setMsg("Error");
@@ -38,9 +59,12 @@ const MyWidget = () => {
     });
   }
   //console.log(mycal);
+  //
+
+  
 
   return (
-    <div className="p-6 max-w-sm mx-auto bg-white rounded-xl shadow-lg">
+    <div className="p-6 mx-auto bg-white rounded-xl shadow-lg max-w-[900px]">
       <div className="text-center space-y-4">
         <h2 className="text-xl font-bold text-gray-800">Upload file</h2>
 
@@ -49,11 +73,10 @@ const MyWidget = () => {
         </div>
 
         <div className="flex justify-center">
-          <input onChange ={(e) => {setFile(e.target.files[0])} } type="file"/>
+          <input onChange ={(e) => {setFile(e.target.files[0])} } type="file" accept=".ics" className ="p-2 bg-blue-100 rounded-full hover:bg-blue-200 transition-colors" />
           <button onClick={handleUpload} className="p-2 bg-blue-100 rounded-full hover:bg-blue-200 transition-colors">
             Upload ICS file
           </button>
-          {progress.started && <progress max ="100" value={progress.pc}></progress> }
         </div>
       </div>
     </div>
