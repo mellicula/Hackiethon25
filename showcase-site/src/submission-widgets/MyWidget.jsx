@@ -1,6 +1,6 @@
 // real one <3
 import React, { useState , useEffect} from 'react';
-import "./cc-styles.css";
+//import "./cc-styles.css";
 import ICAL from "ical.js";
 
 
@@ -14,9 +14,15 @@ const MyWidget = () => {
   const [ date, setDate ] = useState(null);
 
 
+  function getRandomMsg() {
+    const msgs = ["another friend 😄😆", "🤩 the more the merrier 💗", "🤗 ur so popular", "🤨 interesting choice 🫣"]
+    return msgs[Math.floor(Math.random() * msgs.length)]
+  }
+
+
   function handleUpload() {
     if (!file || !name) {
-      setMsg("Please add a name and upload a file/url!");
+      setMsg("Please add a name AND upload a file!");
       return;
     }
     setMsg("");
@@ -29,7 +35,7 @@ const MyWidget = () => {
         setFriends(prev => [...prev, { name, attendsLectures: true, jcalData: comp }]);
         setName("");
         setFile(null);
-        setMsg("success!");
+        setMsg(getRandomMsg());
         document.getElementById("file-input").value = "";
       } catch (error) {
         setMsg("idkkk man try smth else");
@@ -77,13 +83,14 @@ const MyWidget = () => {
     const cell = r.getElementsByTagName("td")[col];
     if (cell) {
       if (chck) cell.textContent = ev.getFirstPropertyValue("summary");
-      cell.style.backgroundColor  = "#440345";
+      cell.style.backgroundColor  = "#fcf2f7";
     }
   }
 
   function createTable() {
     var table = document.getElementById("timetable");
     while (table.firstChild) table.removeChild(table.firstChild);
+    table.classList.add("test")
 
     // each row is a time, each column is a person.
     var headerRow = document.createElement("tr");
@@ -147,6 +154,41 @@ const MyWidget = () => {
       }
     }
   }
+  const style = document.createElement("style");
+  style.innerHTML = `
+    .test {
+      border: 1px solid #666666;
+      margin-top: 40px;
+      margin-bottom: 30px;
+    }
+
+    .test tbody tr td {
+      font-family: "lucida grande", verdana, sans-serif;
+      font-size: 8pt;
+      padding: 3px 8px;
+      border-left: 3px solid #D9D9D9; 
+      border-top: 3px solid #D9D9D9; 
+      color: #ffea00;
+    }
+
+    .test tbody tr.selected td {
+      background-color: #3d80df;
+      color: #ffea00;
+      font-weight: bold;
+      border-left: 1px solid #346DBE;
+      border-bottom: 1px solid #7DAAEA;
+    }
+  `;
+  document.head.appendChild(style);
+
+
+
+
+
+
+
+
+
 
   function whenToMeet() {
     const allAv = [];
@@ -221,7 +263,7 @@ return (
 
         </div>
 
-        {msg && <p className="text-red-400 mb-2">{msg}</p>}
+        {msg && <p className="text-green-400 mb-2">{msg}</p>}
         <h2 className = ""> Friends List </h2>
         <ul className="list-disc pl-6">
           {friends.map((friend, index) => (
@@ -256,7 +298,7 @@ return (
           Best times to meet
         </button>
         {gen===1 && (
-          <div className="p-4 bg-gray-800 rounded-lg" style={{height: '300px', overflow: 'scroll'}}>
+          <div className="p-4 bg-gray-800 rounded-lg" style={{height: '600px', overflow: 'scroll'}}>
             {friends.map((friend, index) => {
               const evnts = friend.jcalData.getAllSubcomponents("vevent");
               const filtered = filterByDate(evnts, date, friend.attendsLectures);
@@ -278,7 +320,7 @@ return (
           </div>
         )}
         {gen===2 && (
-          <div className="p-4 bg-gray-800 rounded-lg" style={{height: '300px', overflow: 'scroll'}}>
+          <div className="p-4 bg-gray-800 rounded-lg" style={{height: '600px', overflow: 'scroll'}}>
            <button 
               onClick={() => {
                 setGen(2);
