@@ -10,6 +10,7 @@ const MyWidget = () => {
   const [ cal, setCal ] = useState("");
   const [ msg, setMsg ] = useState("");
   const [ gen, setGen ] = useState(null);
+  const [ date, setDate ] = useState(null);
 
 
   function handleUpload() {
@@ -24,7 +25,7 @@ const MyWidget = () => {
       try {
         const jcalData = ICAL.parse(event.target.result);
         const comp = new ICAL.Component(jcalData);
-        setFriends(prev => [...prev, { name, jcalData: comp }]);
+        setFriends(prev => [...prev, { name, attendsLectures: false, jcalData: comp }]);
         setName("");
         setFile(null);
         setMsg("success!");
@@ -37,11 +38,17 @@ const MyWidget = () => {
 
   }
 
+  function checkbox(index) {
+    setFriends(prev => prev.map((friend, i) => 
+      i === index ? { ...friend, attendsLectures: !friend.attendsLectures } : friend
+      ));
+  }
+
 
   
 return (
     <div className = "max-w-4xl mx-auto p-6 bg-gray-900 text-white rounded-lg shadow-lg">
-      <h1 className = "font-bold text-center">Campus Calendar G1</h1>
+      <input type="text" placeholder="group name" className="font-bold text-center"/>
       <div className="flex mb-4">
         <input
           type = "text"
@@ -59,6 +66,11 @@ return (
           className="p-2 bg-blue-100 rounded-full hover:bg-blue-200 transition-colors"
         />
 
+        <input
+          type="date"
+          onChange={(e) => {setDate(e.target.value)} }
+        />
+
         <button
           onClick={handleUpload}
           className="ml-2 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
@@ -73,6 +85,14 @@ return (
           <li key={index} className="flex justify-between p-2 border-b">
             <span>{friend.name}</span>
             <span className="text-sm text-gray-400">📅 {friend.jcalData.getAllSubcomponents("vevent").length} events</span>
+            <input
+              type="checkbox" 
+              id={index} 
+              name={index}
+              checked={friend.attendsLectures}
+              value="Lecture" 
+              onChange={() => toggleAttendance(index)}
+              />
           </li>
         ))}
       </ul>
@@ -110,13 +130,5 @@ export default MyWidget;
  *
  * all of this should get added as a list in friends every
  * time you upload a file and a name.
- *
- * 
- *
- *
- *
- *
- *
- *
  *
  */
