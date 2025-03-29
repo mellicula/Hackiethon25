@@ -1,6 +1,5 @@
-// real one <3
+// real one
 import React, { useState , useEffect} from 'react';
-//import "./cc-styles.css";
 import ICAL from "ical.js";
 
 
