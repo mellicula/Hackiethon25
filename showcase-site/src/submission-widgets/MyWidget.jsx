@@ -43,17 +43,17 @@ const MyWidget = () => {
       i === index ? { ...friend, attendsLectures: !friend.attendsLectures } : friend
       ));
   }
-/*
+
   function getEvents(selectedDate) {
     allEvents = [];
-    for (int i = 0; i<friends.length; i++) {
+    for (let i = 0; i<friends.length; i++) {
       friendEvents = filterByDate(friends[i].jcalData.getAllSubcomponents("vevent"), selectedDate);
-      for (int j = 0; j<friendEvents.length(); j++) {
+      for (let j = 0; j<friendEvents.length(); j++) {
         allEvents.push({name: friends[i].name, event: friendEvents[j]});
       }
     }
     return allEvents;
-  }*/
+  }
 
   function filterByDate(events, selectedDate) {
     return events.filter((vevent) => {
