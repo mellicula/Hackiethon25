@@ -48,7 +48,7 @@ const MyWidget = () => {
     allEvents = [];
     for (let i = 0; i<friends.length; i++) {
       friendEvents = filterByDate(friends[i].jcalData.getAllSubcomponents("vevent"), selectedDate);
-      for (let j = 0; j<friendEvents.length(); j++) {
+      for (let j = 0; j<friendEvents.length; j++) {
         allEvents.push({name: friends[i].name, event: friendEvents[j]});
       }
     }
@@ -66,6 +66,77 @@ const MyWidget = () => {
       return eventDate===selectedDate;
     });
   }
+
+  function updateCell(row, col, value) {
+    const table = document.getElementById("timetable");
+    const r = table.getElementsByTagName("tr")[row+1];
+    const cell = r.getElementsByTagName("td")[col];
+    if (cell) {
+      cell.textContent = value;
+    }
+  }
+
+  function createTable() {
+    var table = document.getElementById("timetable");
+    while (table.firstChild) table.removeChild(table.firstChild);
+
+    // each row is a time, each column is a person.
+    var headerRow = document.createElement("tr");
+    var th = document.createElement("th");
+    var h = document.createElement("h1");
+    h.textContent = "Times";
+    th.appendChild(h);
+    headerRow.appendChild(th);
+    console.log("friends:");
+    console.log(friends.length);
+    var times = Array.from({ length: 24 }, (_, i) => `${i}:00`);
+    for (let i = 0; i<friends.length; i++) {
+      var th = document.createElement("th");
+      var h = document.createElement("h1");
+      h.textContent = friends[i].name;
+      th.appendChild(h);
+      headerRow.appendChild(th);
+    }
+
+    table.appendChild(headerRow);
+
+    times.forEach(time => {
+      var row = document.createElement("tr");
+
+      var timeCell = document.createElement("td");
+      timeCell.textContent = time;
+      row.appendChild(timeCell);
+
+      for (var i = 0; i < friends.length; i++) {
+          var td = document.createElement("td");
+          td.style.pointerEvents = "none";  
+          row.appendChild(td);
+      }
+
+      table.appendChild(row);
+    });
+
+    for (var i = 0; i<friends.length; i++) {
+      var friendEvents = filterByDate(friends[i].jcalData.getAllSubcomponents("vevent"), date);
+      for (var j = 0; j<friendEvents.length; j++) {
+        // get the start hour of the event.
+        // update row i and col hour-1 with the summary of event
+        const event = friendEvents[j];
+        const eventStart = event.getFirstPropertyValue("dtstart").toString();
+        const eventHour = new Date(eventStart).getHours();
+        const eventSummary = event.getFirstProperty("summary");
+
+        updateCell(eventHour + 1, i + 1, eventSummary);
+      }
+    }
+  }
+
+
+
+
+
+
+
 /*
   function switchFormat(events) {
     // currently events are per person. we want to order by start time.
@@ -78,7 +149,7 @@ const MyWidget = () => {
   
 return (
     <div className = "max-w-4xl mx-auto p-6 bg-gray-900 text-white rounded-lg shadow-lg">
-      <div className="max-h-400 overflow-auto p-4 bg-gray-800 rounded-lg mt-4">
+      <div className="max-h-400 p-4 bg-gray-800 rounded-lg mt-4">
         <input type="text" placeholder="group name" className="font-bold text-center"/>
         <div className="flex mb-4">
           <input
@@ -134,12 +205,14 @@ return (
           Sort by Person
         </button>
         <button 
-          onClick={() => setGen(2)}
+          onClick={() => {
+            setGen(2);
+          }}
           className="ml-2 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
           Sort by Time
         </button>
         {gen===1 && (
-          <div overflow="auto" className="p-4 bg-gray-800 rounded-lg">
+          <div className="p-4 bg-gray-800 rounded-lg" style={{height: '300px', overflow: 'scroll'}}>
             {friends.map((friend, index) => {
               const evnts = friend.jcalData.getAllSubcomponents("vevent");
               const filtered = filterByDate(evnts, date);
@@ -161,25 +234,18 @@ return (
           </div>
         )}
         {gen===2 && (
-          <div overflow="auto" className="p-4 bg-pink-800 rounded-lg">
-            {friends.map((friend, index) => {
-              const evnts = friend.jcalData.getAllSubcomponents("vevent");
-              const filtered = filterByDate(evnts, date);
+          <div className="p-4 bg-pink-800 rounded-lg" style={{height: '300px', overflow: 'scroll'}}>
+           <button 
+              onClick={() => {
+                setGen(2);
+                createTable();
+              }}
+              className="ml-2 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
+              Sort by Time
+            </button>
 
-              return (
-                <div key={index} className="mb-4">
-                  <h3 className="text-lg font-semibold">{friend.name}'s Events</h3>
-                  <ul className="list-disc pl-6">
-                    {filtered.map((vevent, i) => (
-                      <li key={i} className="p-2 border-b">
-                        <span>{vevent.getFirstPropertyValue("summary") || "No Title"}</span>
-                        <span>{vevent.getFirstPropertyValue("dtstart").toString()}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              );
-            })}
+            <table id="timetable">
+            </table>
           </div>
         )}
 
