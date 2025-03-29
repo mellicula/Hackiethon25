@@ -13,6 +13,11 @@ const MyWidget = () => {
   const [ gen, setGen ] = useState(null);
   const [ date, setDate ] = useState(null);
 
+  useEffect(() => {
+    if (!date) {
+      setDate(new Date().toISOString().split("T")[0]);
+    }
+  }, [date]);
 
   function getRandomMsg() {
     const msgs = ["another friend 😄😆", "🤩 the more the merrier 💗", "🤗 ur so popular", "🤨 interesting choice 🫣"]
@@ -83,7 +88,7 @@ const MyWidget = () => {
     const cell = r.getElementsByTagName("td")[col];
     if (cell) {
       if (chck) cell.textContent = ev.getFirstPropertyValue("summary");
-      cell.style.backgroundColor  = "#fcf2f7";
+      cell.style.backgroundColor = "#152f6b";
     }
   }
 
@@ -156,28 +161,27 @@ const MyWidget = () => {
   }
   const style = document.createElement("style");
   style.innerHTML = `
+    .widget {
+      font-family: "Fira Code", mono;
+    }
     .test {
       border: 1px solid #666666;
+      text-align:center;
       margin-top: 40px;
       margin-bottom: 30px;
     }
-
-    .test tbody tr td {
-      font-family: "lucida grande", verdana, sans-serif;
-      font-size: 8pt;
-      padding: 3px 8px;
-      border-left: 3px solid #D9D9D9; 
-      border-top: 3px solid #D9D9D9; 
-      color: #ffea00;
+    .test th, .test td {
+      width: 100px; 
+      text-align: center; 
+    }
+    .test th:nth-child(1), .test td:nth-child(1) {
+      width: 60px; 
     }
 
-    .test tbody tr.selected td {
-      background-color: #3d80df;
-      color: #ffea00;
-      font-weight: bold;
-      border-left: 1px solid #346DBE;
-      border-bottom: 1px solid #7DAAEA;
+    .test tr, .test td {
+      height: 90px; /* Adjust the height as needed */
     }
+
   `;
   document.head.appendChild(style);
 
@@ -234,8 +238,8 @@ const MyWidget = () => {
 
   
 return (
-    <div className = "max-w-4xl mx-auto p-6 bg-gray-900 text-white rounded-lg shadow-lg">
-      <div className="max-h-400 p-4 bg-gray-800 rounded-lg mt-4">
+  <div className= "widget max-w-4xl bg-gradient-to-r  from-emerald-900 via-indigo-700 to-blue-800 mx-auto p-6 bg-gray-900 text-white rounded-lg shadow-lg hover:shadow-xl focus:ring-4 focus:ring-blue-300" >
+      <div className="max-h-400 p-4 bg-gray-900 rounded-lg mt-4">
         <input type="text" placeholder="group name" className="font-bold text-center"/>
         <div className="flex mb-4">
           <input
@@ -251,13 +255,13 @@ return (
             onChange = {(e) => {setFile(e.target.files[0])} }
             type = "file"
             accept=".ics"
-            className="p-2 bg-blue-100 rounded-full hover:bg-blue-200 transition-colors"
+            className="p-2 bg-blue-100 text-blue-900 rounded-full hover:bg-blue-200 transition-colors"
           />
 
 
           <button
             onClick={handleUpload}
-            className="ml-2 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
+            className="ml-2 bg-sky-500 text-white px-4 py-2 rounded hover:bg-indigo-300 transition">
             Upload ICS file
           </button>
 
@@ -282,19 +286,20 @@ return (
         </ul>
         <input
           type="date"
+          value={date || new Date().toISOString().split("T")[0]}
           placeholder = "pick a date"
           onChange={(e) => {setDate(e.target.value)} }
         />
         <button 
           onClick={() => setGen(1)}
-          className="ml-2 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
+          className="ml-2 bg-emerald-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
           What's on {date}?
         </button>
         <button 
           onClick={() => {
             setGen(2);
           }}
-          className="ml-2 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
+          className="ml-2 bg-emerald-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
           Best times to meet
         </button>
         {gen===1 && (
@@ -330,14 +335,14 @@ return (
               Generate the timetable!
             </button>
 
-            <table id="timetable" className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-            </table>
             <p className="text-blue-300">The best times to meet are</p>
             <p className="">
               {whenToMeet().map((time, i) => (
                   "🕰️ " + time + " 🕰️"
               ))}
             </p>
+            <table id="timetable" className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+            </table>
           </div>
         )}
 
