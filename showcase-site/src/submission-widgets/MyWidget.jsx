@@ -23,6 +23,11 @@ const MyWidget = () => {
     return msgs[Math.floor(Math.random() * msgs.length)]
   }
 
+  function getEmoji() {
+    const emojis = ["😄", "😝", "🤔", "🥹", "😼", "🙈", "🤖", "👹"];
+    return emojis[Math.floor(Math.random() * emojis.length)]
+  }
+
 
 
   function handleUpload() {
@@ -90,7 +95,7 @@ const MyWidget = () => {
       if (chck) cell.textContent = ev.getFirstPropertyValue("summary");
       //cell.style.backgroundColor = "#152f6b";
       cell.style.backgroundImage = "linear-gradient(to bottom right, blue, purple)";
-      cell.style.color = "black";
+      cell.style.color = "white";
     }
   }
 
@@ -102,17 +107,21 @@ const MyWidget = () => {
     // each row is a time, each column is a person.
     var headerRow = document.createElement("tr");
     var th = document.createElement("th");
+    headerRow.style.height = "50px";
     var h = document.createElement("h1");
     h.textContent = "Times";
+    h.style.fontSize = "20px";
+    h.style.fontStyle = "bold";
     th.appendChild(h);
     headerRow.appendChild(th);
-    console.log("friends:");
-    console.log(friends.length);
     var times = Array.from({ length: 11}, (_, i) => convertTime12(i+8));
     for (let i = 0; i<friends.length; i++) {
       var th = document.createElement("th");
       var h = document.createElement("h1");
-      h.textContent = friends[i].name;
+      var emji = getEmoji();
+      h.textContent = emji + " " + friends[i].name + " " +emji;
+      h.style.fontSize = "20px";
+      h.style.fontStyle = "bold";
       th.appendChild(h);
       headerRow.appendChild(th);
     }
@@ -124,6 +133,8 @@ const MyWidget = () => {
 
       var timeCell = document.createElement("td");
       timeCell.textContent = time;
+      timeCell.style.fontSize = "20px";
+      timeCell.style.fontStyle = "bold";
       row.appendChild(timeCell);
 
       for (var i = 0; i < friends.length; i++) {
@@ -167,21 +178,26 @@ const MyWidget = () => {
       font-family: "Fira Code", mono;
     }
     .test {
-      border: 1px solid #666666;
+      border: 3px solid #666666;
       text-align:center;
       margin-top: 40px;
+      font-style: bold;
       margin-bottom: 30px;
     }
     .test th, .test td {
       width: 80px; 
+      border: 1px solid #666666;
       text-align: center; 
     }
     .test th:nth-child(1), .test td:nth-child(1) {
-      width: 80px; 
+      width: 10px; 
+      font-style: bold;
+      border: 1px solid #666666;
     }
 
     .test tr, .test td {
       height: 100px; 
+      border: 1px solid #666666;
     }
 
   `;
@@ -189,8 +205,8 @@ const MyWidget = () => {
 
 
   function convertTime12(time) {
-    if (time >= 12) return (time%12 || 12) + " pm";
-    return (time) + " am";
+    if (time >= 12) return (time%12 || 12) + "pm";
+    return (time) + "am";
   }
 
   function whenToMeet() {
@@ -233,7 +249,7 @@ const MyWidget = () => {
 return (
   <div className= "widget max-w-4xl bg-gradient-to-r  from-emerald-900 via-indigo-700 to-blue-800 mx-auto p-6 bg-gray-900 text-white rounded-lg shadow-lg hover:shadow-xl focus:ring-4 focus:ring-blue-300" >
       <div className="max-h-400 p-4 bg-gray-900 rounded-lg mt-4">
-        <input type="text" placeholder="group name here..." className="text-2xl py-3 mb-3 font-bold text-center"/>
+        <input type="text" placeholder="group name here..." className="w-full text-2xl py-3 mb-3 font-bold text-center"/>
         <div className="flex mb-4">
           <input
             
@@ -301,7 +317,7 @@ return (
           Best times to meet
         </button>
         {gen===1 && (
-          <div className="p-4 bg-gray-800 rounded-lg" style={{height: '450px', overflow: 'scroll'}}>
+          <div className="p-4 bg-gray-800 rounded-lg mt-2 bg-gradient-to-tl  from-gray-800 via-emerald-900 to-gray-800"  style={{height: '450px', overflow: 'scroll'}}>
             {friends.map((friend, index) => {
               const evnts = friend.jcalData.getAllSubcomponents("vevent");
               const filtered = filterByDate(evnts, date, friend.attendsLectures);
@@ -323,7 +339,7 @@ return (
           </div>
         )}
         {gen===2 && (
-          <div className="p-4 bg-gray-800 rounded-lg" style={{height: '450px', overflow: 'scroll'}}>
+          <div className="p-4 bg-gradient-to-tl  from-gray-800 via-indigo-900 to-gray-800 from: rounded-lg mt-2" style={{height: '450px', overflow: 'scroll'}}>
            <button 
               onClick={() => {
                 setGen(2);
@@ -336,14 +352,14 @@ return (
 
 
             <br/>
-            <p className="text-blue-300 text-center font-bold text-3xl">⭐ the best times to meet are ⭐</p>
+          <p className="text-blue-300 mt-3 text-center font-bold text-3xl">🍃 The best times to meet are: 🍃</p>
             <br/>
-            <p className="text-2xl font-bold">
+            <p className="text-2xl text-sky-100 font-bold text-center">
               {whenToMeet().map((time, i) => (
-                  " 🕰️ " + convertTime12(time)
-              ))}
+                  " 💎️ " + convertTime12(time)
+              ))} 💎
             </p>
-            <table id="timetable" className="w-full text-xs text-left rtl:text-right text-white font-bold">
+            <table id="timetable" className="w-full text-xs text-left rtl:text-right">
             </table>
           </div>
         )}
