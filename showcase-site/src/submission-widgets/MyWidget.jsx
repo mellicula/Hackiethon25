@@ -8,7 +8,6 @@ const MyWidget = () => {
   const [ friends, setFriends ] = useState([]);
   const [ name, setName ] = useState("");
   const [ file, setFile ] = useState(null);
-  const [ cal, setCal ] = useState("");
   const [ msg, setMsg ] = useState("");
   const [ gen, setGen ] = useState(null);
   const [ date, setDate ] = useState(null);
@@ -23,6 +22,7 @@ const MyWidget = () => {
     const msgs = ["another friend 😄😆", "🤩 the more the merrier 💗", "🤗 ur so popular", "🤨 interesting choice 🫣"]
     return msgs[Math.floor(Math.random() * msgs.length)]
   }
+
 
 
   function handleUpload() {
@@ -88,7 +88,9 @@ const MyWidget = () => {
     const cell = r.getElementsByTagName("td")[col];
     if (cell) {
       if (chck) cell.textContent = ev.getFirstPropertyValue("summary");
-      cell.style.backgroundColor = "#152f6b";
+      //cell.style.backgroundColor = "#152f6b";
+      cell.style.backgroundImage = "linear-gradient(to bottom right, blue, purple)";
+      cell.style.color = "black";
     }
   }
 
@@ -106,7 +108,7 @@ const MyWidget = () => {
     headerRow.appendChild(th);
     console.log("friends:");
     console.log(friends.length);
-    var times = Array.from({ length: 11}, (_, i) => `${i+8}:00`);
+    var times = Array.from({ length: 11}, (_, i) => convertTime12(i+8));
     for (let i = 0; i<friends.length; i++) {
       var th = document.createElement("th");
       var h = document.createElement("h1");
@@ -171,28 +173,25 @@ const MyWidget = () => {
       margin-bottom: 30px;
     }
     .test th, .test td {
-      width: 100px; 
+      width: 80px; 
       text-align: center; 
     }
     .test th:nth-child(1), .test td:nth-child(1) {
-      width: 60px; 
+      width: 80px; 
     }
 
     .test tr, .test td {
-      height: 90px; /* Adjust the height as needed */
+      height: 100px; 
     }
 
   `;
   document.head.appendChild(style);
 
 
-
-
-
-
-
-
-
+  function convertTime12(time) {
+    if (time >= 12) return (time%12 || 12) + " pm";
+    return (time) + " am";
+  }
 
   function whenToMeet() {
     const allAv = [];
@@ -205,24 +204,18 @@ const MyWidget = () => {
         const event = friendsEvents[j]; 
         const eventStart = event.getFirstPropertyValue("dtstart").toString();
         const eventHour = new Date(eventStart).getHours();
-        availability &= ~(1 << (eventHour - 8));  
+        availability &= ~(1 << (eventHour-8));  
       }
       allAv.push(availability);
     }
-
     let temp = (1 << 12) - 1;
 
-    for (var i = 0; i < allAv.length; i++) {
-      temp &= allAv[i]; 
-    }
+    for (var i = 0; i < allAv.length; i++) temp &= allAv[i]; 
 
     const times = [];
     for (let hr = 8; hr < 19; hr++) {
-      if ((temp & (1 << (hr - 8))) !== 0) {
-        times.push(`${hr}:00`);
-      }
+      if ((temp & (1 << (hr - 8))) !== 0) times.push(hr);
     }
-
     return times;
   }
 
@@ -240,14 +233,15 @@ const MyWidget = () => {
 return (
   <div className= "widget max-w-4xl bg-gradient-to-r  from-emerald-900 via-indigo-700 to-blue-800 mx-auto p-6 bg-gray-900 text-white rounded-lg shadow-lg hover:shadow-xl focus:ring-4 focus:ring-blue-300" >
       <div className="max-h-400 p-4 bg-gray-900 rounded-lg mt-4">
-        <input type="text" placeholder="group name" className="font-bold text-center"/>
+        <input type="text" placeholder="group name here..." className="text-2xl py-3 mb-3 font-bold text-center"/>
         <div className="flex mb-4">
           <input
+            
             type = "text"
-            placeholder = "friend name here"
+            placeholder = "friend name here..."
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="flex-1 p-2 rounded text-white"
+            className="text-center flex-1 p-2 rounded-full bg-indigo-800 text-white "
           />
 
           <input
@@ -255,55 +249,59 @@ return (
             onChange = {(e) => {setFile(e.target.files[0])} }
             type = "file"
             accept=".ics"
-            className="p-2 bg-blue-100 text-blue-900 rounded-full hover:bg-blue-200 transition-colors"
+            className="ml-2 p-2 text-center bg-blue-100 text-blue-900 rounded-full hover:bg-blue-200 transition-colors"
           />
 
 
           <button
             onClick={handleUpload}
             className="ml-2 bg-sky-500 text-white px-4 py-2 rounded hover:bg-indigo-300 transition">
-            Upload ICS file
+            Upload .ics file
           </button>
 
         </div>
 
         {msg && <p className="text-green-400 mb-2">{msg}</p>}
-        <h2 className = ""> Friends List </h2>
+        <h2 className = "italic"> you have {friends.length} {friends.length!== 1 ? "friends wow":"friend lol" } </h2>
         <ul className="list-disc pl-6">
           {friends.map((friend, index) => (
             <li key={index} className="flex justify-between p-2 border-b">
               <span>{friend.name}</span>
-              <input
-                type="checkbox" 
-                id={index} 
-                name={index}
-                checked={friend.attendsLectures}
-                value="Lecture" 
-                onChange={() => checkbox(index)}
+              <div>
+                <label for={index}> 🤓 Attends their lectures 🤓 </label>
+                <input
+                  type="checkbox" 
+                  id={index} 
+                  name={index}
+                  checked={friend.attendsLectures}
+                  value="Lecture" 
+                  onChange={() => checkbox(index)}
                 />
+              </div>
             </li>
           ))}
         </ul>
         <input
           type="date"
+          placeholder='ok'
+          className="text-teal-900 rounded hover:animate-bounce bg-blue-300"
           value={date || new Date().toISOString().split("T")[0]}
-          placeholder = "pick a date"
           onChange={(e) => {setDate(e.target.value)} }
         />
         <button 
           onClick={() => setGen(1)}
-          className="ml-2 bg-emerald-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
+          className="ml-2 bg-emerald-500 text-white px-4 py-2 rounded hover:animate-spin hover:bg-green-600 transition">
           What's on {date}?
         </button>
         <button 
           onClick={() => {
             setGen(2);
           }}
-          className="ml-2 bg-emerald-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
+          className="ml-2 bg-emerald-500 text-white px-4 py-2 rounded hover:animate-spin hover:bg-green-600 transition">
           Best times to meet
         </button>
         {gen===1 && (
-          <div className="p-4 bg-gray-800 rounded-lg" style={{height: '600px', overflow: 'scroll'}}>
+          <div className="p-4 bg-gray-800 rounded-lg" style={{height: '450px', overflow: 'scroll'}}>
             {friends.map((friend, index) => {
               const evnts = friend.jcalData.getAllSubcomponents("vevent");
               const filtered = filterByDate(evnts, date, friend.attendsLectures);
@@ -325,23 +323,27 @@ return (
           </div>
         )}
         {gen===2 && (
-          <div className="p-4 bg-gray-800 rounded-lg" style={{height: '600px', overflow: 'scroll'}}>
+          <div className="p-4 bg-gray-800 rounded-lg" style={{height: '450px', overflow: 'scroll'}}>
            <button 
               onClick={() => {
                 setGen(2);
                 createTable();
               }}
-              className="ml-2 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
-              Generate the timetable!
+              className="ml-2 bg-green-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition">
+              see the timetable!
             </button>
 
-            <p className="text-blue-300">The best times to meet are</p>
-            <p className="">
+
+
+            <br/>
+            <p className="text-blue-300 text-center font-bold text-3xl">⭐ the best times to meet are ⭐</p>
+            <br/>
+            <p className="text-2xl font-bold">
               {whenToMeet().map((time, i) => (
-                  "🕰️ " + time + " 🕰️"
+                  " 🕰️ " + convertTime12(time)
               ))}
             </p>
-            <table id="timetable" className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+            <table id="timetable" className="w-full text-xs text-left rtl:text-right text-white font-bold">
             </table>
           </div>
         )}
@@ -353,12 +355,3 @@ return (
 
 export default MyWidget;
 
-/* Project Plan
- *
- * can add multiple friends' ics files and store the parsed
- * jcalData or whatever is easiest to query on.
- *
- * all of this should get added as a list in friends every
- * time you upload a file and a name.
- *
- */
