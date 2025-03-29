@@ -1,5 +1,6 @@
 // real one <3
 import React, { useState , useEffect} from 'react';
+import "./cc-styles.css";
 import ICAL from "ical.js";
 
 
@@ -25,13 +26,13 @@ const MyWidget = () => {
       try {
         const jcalData = ICAL.parse(event.target.result);
         const comp = new ICAL.Component(jcalData);
-        setFriends(prev => [...prev, { name, attendsLectures: false, jcalData: comp }]);
+        setFriends(prev => [...prev, { name, attendsLectures: true, jcalData: comp }]);
         setName("");
         setFile(null);
         setMsg("success!");
         document.getElementById("file-input").value = "";
       } catch (error) {
-        setMsg("idkkk");
+        setMsg("idkkk man try smth else");
       }
     };
     reader.readAsText(file);
@@ -47,7 +48,7 @@ const MyWidget = () => {
   function getEvents(selectedDate) {
     allEvents = [];
     for (let i = 0; i<friends.length; i++) {
-      friendEvents = filterByDate(friends[i].jcalData.getAllSubcomponents("vevent"), selectedDate);
+      friendEvents = filterByDate(friends[i].jcalData.getAllSubcomponents("vevent"), selectedDate, friends[i].attendsLectures);
       for (let j = 0; j<friendEvents.length; j++) {
         allEvents.push({name: friends[i].name, event: friendEvents[j]});
       }
@@ -55,24 +56,28 @@ const MyWidget = () => {
     return allEvents;
   }
 
-  function filterByDate(events, selectedDate) {
+  function filterByDate(events, selectedDate, skips) {
     return events.filter((vevent) => {
       const eventStart = vevent.getFirstPropertyValue("dtstart").toString().slice(0,10);
       if (!eventStart) return false;
       const icalTime = new ICAL.Time();
       icalTime.fromJSDate(new Date(eventStart.toString()), true);
       const eventDate = new Date(icalTime.toJSDate()).toISOString().slice(0, 10);
-      if (eventStart===selectedDate) console.log(selectedDate.toString());
-      return eventDate===selectedDate;
+      return eventDate===selectedDate && (skips || !vevent.getFirstPropertyValue("summary").includes("Lecture"));
     });
   }
 
-  function updateCell(row, col, value) {
+  function updateCell(row, col, ev, chck) {
+    console.log("updated!!");
+    console.log(row);
+    console.log(col);
+    console.log(ev.getFirstPropertyValue("summary"));
     const table = document.getElementById("timetable");
     const r = table.getElementsByTagName("tr")[row+1];
     const cell = r.getElementsByTagName("td")[col];
     if (cell) {
-      cell.textContent = value;
+      if (chck) cell.textContent = ev.getFirstPropertyValue("summary");
+      cell.style.backgroundColor  = "#440345";
     }
   }
 
@@ -89,7 +94,7 @@ const MyWidget = () => {
     headerRow.appendChild(th);
     console.log("friends:");
     console.log(friends.length);
-    var times = Array.from({ length: 24 }, (_, i) => `${i}:00`);
+    var times = Array.from({ length: 11}, (_, i) => `${i+8}:00`);
     for (let i = 0; i<friends.length; i++) {
       var th = document.createElement("th");
       var h = document.createElement("h1");
@@ -117,24 +122,63 @@ const MyWidget = () => {
     });
 
     for (var i = 0; i<friends.length; i++) {
-      var friendEvents = filterByDate(friends[i].jcalData.getAllSubcomponents("vevent"), date);
+      var friendEvents = filterByDate(friends[i].jcalData.getAllSubcomponents("vevent"), date, friends[i].attendsLectures);
       for (var j = 0; j<friendEvents.length; j++) {
         // get the start hour of the event.
         // update row i and col hour-1 with the summary of event
-        const event = friendEvents[j];
-        const eventStart = event.getFirstPropertyValue("dtstart").toString();
+        const event = new ICAL.Event(friendEvents[j]);
+        //const eventStart = event.getFirstPropertyValue("dtstart").toString();
+        const eventStart = event.startDate.toString();
         const eventHour = new Date(eventStart).getHours();
-        const eventSummary = event.getFirstProperty("summary");
+        const eventSummary = event.summary;
 
-        updateCell(eventHour + 1, i + 1, eventSummary);
+        const evnt = friendEvents[j]; 
+        const evntStart = evnt.getFirstPropertyValue("dtstart").toString();
+        const evntHour = new Date(evntStart).getHours();
+
+        console.log(evntHour);
+        console.log(event.duration.hours);
+        console.log(evntHour);
+
+        for (var tm = evntHour-8; tm < evntHour - 8+event.duration.hours; tm++) {
+          updateCell(tm, i + 1, evnt, tm===evntHour-8);
+        }
+
       }
     }
   }
 
+  function whenToMeet() {
+    const allAv = [];
 
+    for (var i = 0; i < friends.length; i++) {
+      var friendsEvents = filterByDate(friends[i].jcalData.getAllSubcomponents("vevent"), date, friends[i].attendsLectures);
+      var availability = (1 << 12) - 1; 
 
+      for (var j = 0; j < friendsEvents.length; j++) {
+        const event = friendsEvents[j]; 
+        const eventStart = event.getFirstPropertyValue("dtstart").toString();
+        const eventHour = new Date(eventStart).getHours();
+        availability &= ~(1 << (eventHour - 8));  
+      }
+      allAv.push(availability);
+    }
 
+    let temp = (1 << 12) - 1;
 
+    for (var i = 0; i < allAv.length; i++) {
+      temp &= allAv[i]; 
+    }
+
+    const times = [];
+    for (let hr = 8; hr < 19; hr++) {
+      if ((temp & (1 << (hr - 8))) !== 0) {
+        times.push(`${hr}:00`);
+      }
+    }
+
+    return times;
+  }
 
 
 /*
@@ -183,48 +227,48 @@ return (
           {friends.map((friend, index) => (
             <li key={index} className="flex justify-between p-2 border-b">
               <span>{friend.name}</span>
-              <span className="text-sm text-gray-400">📅 {friend.jcalData.getAllSubcomponents("vevent").length} events</span>
               <input
                 type="checkbox" 
                 id={index} 
                 name={index}
                 checked={friend.attendsLectures}
                 value="Lecture" 
-                onChange={() => toggleAttendance(index)}
+                onChange={() => checkbox(index)}
                 />
             </li>
           ))}
         </ul>
         <input
           type="date"
+          placeholder = "pick a date"
           onChange={(e) => {setDate(e.target.value)} }
         />
         <button 
           onClick={() => setGen(1)}
           className="ml-2 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
-          Sort by Person
+          What's on {date}?
         </button>
         <button 
           onClick={() => {
             setGen(2);
           }}
           className="ml-2 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
-          Sort by Time
+          Best times to meet
         </button>
         {gen===1 && (
           <div className="p-4 bg-gray-800 rounded-lg" style={{height: '300px', overflow: 'scroll'}}>
             {friends.map((friend, index) => {
               const evnts = friend.jcalData.getAllSubcomponents("vevent");
-              const filtered = filterByDate(evnts, date);
+              const filtered = filterByDate(evnts, date, friend.attendsLectures);
 
               return (
                 <div key={index} className="mb-4">
-                  <h3 className="text-lg font-semibold">{friend.name}'s Events</h3>
+                  <h3 className="text-lg font-semibold">🗓️ {friend.name}'s Events 🗓️</h3>
                   <ul className="list-disc pl-6">
                     {filtered.map((vevent, i) => (
                       <li key={i} className="p-2 border-b">
                         <span>{vevent.getFirstPropertyValue("summary") || "No Title"}</span>
-                        <span>{vevent.getFirstPropertyValue("dtstart").toString()}</span>
+                        <span>{" at " + vevent.getFirstPropertyValue("dtstart").toString().slice(11,16)}</span>
                       </li>
                     ))}
                   </ul>
@@ -234,18 +278,24 @@ return (
           </div>
         )}
         {gen===2 && (
-          <div className="p-4 bg-pink-800 rounded-lg" style={{height: '300px', overflow: 'scroll'}}>
+          <div className="p-4 bg-gray-800 rounded-lg" style={{height: '300px', overflow: 'scroll'}}>
            <button 
               onClick={() => {
                 setGen(2);
                 createTable();
               }}
               className="ml-2 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
-              Sort by Time
+              Generate the timetable!
             </button>
 
-            <table id="timetable">
+            <table id="timetable" className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
             </table>
+            <p className="text-blue-300">The best times to meet are</p>
+            <p className="">
+              {whenToMeet().map((time, i) => (
+                  "🕰️ " + time + " 🕰️"
+              ))}
+            </p>
           </div>
         )}
 
