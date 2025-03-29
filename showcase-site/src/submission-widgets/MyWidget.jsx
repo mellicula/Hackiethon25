@@ -94,7 +94,7 @@ const MyWidget = () => {
     if (cell) {
       if (chck) cell.textContent = ev.getFirstPropertyValue("summary");
       //cell.style.backgroundColor = "#152f6b";
-      cell.style.backgroundImage = "linear-gradient(to bottom right, blue, purple)";
+      cell.style.backgroundImage = "linear-gradient(to right, purple, blue)";
       cell.style.color = "white";
     }
   }
@@ -196,7 +196,7 @@ const MyWidget = () => {
     }
 
     .test tr, .test td {
-      height: 100px; 
+      height: 80px; 
       border: 1px solid #666666;
     }
 
@@ -220,7 +220,8 @@ const MyWidget = () => {
         const event = friendsEvents[j]; 
         const eventStart = event.getFirstPropertyValue("dtstart").toString();
         const eventHour = new Date(eventStart).getHours();
-        availability &= ~(1 << (eventHour-8));  
+        const avent = new ICAL.Event(friendEvents[j]); const dur = avent.duration.hours;
+        for (let hr = eventHour-8; hr<eventHour-8+dur; hr++) availability &= ~(1 << (hr));  
       }
       allAv.push(availability);
     }
@@ -257,7 +258,7 @@ return (
             placeholder = "friend name here..."
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="text-center flex-1 p-2 rounded-full bg-indigo-800 text-white "
+            className="text-center flex-1 p-2 rounded-full bg-indigo-800 text-white hover:bg-emerald-700 transition-colors"
           />
 
           <input
@@ -317,7 +318,7 @@ return (
           Best times to meet
         </button>
         {gen===1 && (
-          <div className="p-4 bg-gray-800 rounded-lg mt-2 bg-gradient-to-tl  from-gray-800 via-emerald-900 to-gray-800"  style={{height: '450px', overflow: 'scroll'}}>
+          <div className="p-4 bg-gray-800 rounded-lg mt-2 bg-gradient-to-tl  from-gray-800 via-emerald-900 to-gray-800"  style={{height: '300px', overflow: 'scroll'}}>
             {friends.map((friend, index) => {
               const evnts = friend.jcalData.getAllSubcomponents("vevent");
               const filtered = filterByDate(evnts, date, friend.attendsLectures);
@@ -339,7 +340,7 @@ return (
           </div>
         )}
         {gen===2 && (
-          <div className="p-4 bg-gradient-to-tl  from-gray-800 via-indigo-900 to-gray-800 from: rounded-lg mt-2" style={{height: '450px', overflow: 'scroll'}}>
+          <div className="p-4 bg-gradient-to-tl  from-gray-800 via-indigo-900 to-gray-800 from: rounded-lg mt-2" style={{height: '300px', overflow: 'scroll'}}>
            <button 
               onClick={() => {
                 setGen(2);
