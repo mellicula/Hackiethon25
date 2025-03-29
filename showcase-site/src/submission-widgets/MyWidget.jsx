@@ -58,16 +58,6 @@ const MyWidget = () => {
       ));
   }
 
-  function getEvents(selectedDate) {
-    allEvents = [];
-    for (let i = 0; i<friends.length; i++) {
-      friendEvents = filterByDate(friends[i].jcalData.getAllSubcomponents("vevent"), selectedDate, friends[i].attendsLectures);
-      for (let j = 0; j<friendEvents.length; j++) {
-        allEvents.push({name: friends[i].name, event: friendEvents[j]});
-      }
-    }
-    return allEvents;
-  }
 
   function filterByDate(events, selectedDate, skips) {
     return events.filter((vevent) => {
@@ -208,7 +198,7 @@ const MyWidget = () => {
         const event = friendsEvents[j]; 
         const eventStart = event.getFirstPropertyValue("dtstart").toString();
         const eventHour = new Date(eventStart).getHours();
-        const avent = new ICAL.Event(friendEvents[j]); const dur = avent.duration.hours;
+        const avent = new ICAL.Event(friendsEvents[j]); const dur = avent.duration.hours;
         for (let hr = eventHour-8; hr<eventHour-8+dur; hr++) availability &= ~(1 << (hr));  
       }
       allAv.push(availability);
