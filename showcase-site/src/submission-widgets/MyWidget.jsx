@@ -27,8 +27,6 @@ const MyWidget = () => {
     return emojis[Math.floor(Math.random() * emojis.length)]
   }
 
-
-
   function handleUpload() {
     if (!file || !name) {
       setMsg("Please add a name AND upload a file!");
@@ -83,16 +81,11 @@ const MyWidget = () => {
   }
 
   function updateCell(row, col, ev, chck) {
-    console.log("updated!!");
-    console.log(row);
-    console.log(col);
-    console.log(ev.getFirstPropertyValue("summary"));
     const table = document.getElementById("timetable");
     const r = table.getElementsByTagName("tr")[row+1];
     const cell = r.getElementsByTagName("td")[col];
     if (cell) {
       if (chck) cell.textContent = ev.getFirstPropertyValue("summary");
-      //cell.style.backgroundColor = "#152f6b";
       cell.style.backgroundImage = "linear-gradient(to right, purple, blue)";
       cell.style.color = "white";
     }
@@ -151,10 +144,6 @@ const MyWidget = () => {
         // get the start hour of the event.
         // update row i and col hour-1 with the summary of event
         const event = new ICAL.Event(friendEvents[j]);
-        //const eventStart = event.getFirstPropertyValue("dtstart").toString();
-        const eventStart = event.startDate.toString();
-        const eventHour = new Date(eventStart).getHours();
-        const eventSummary = event.summary;
 
         const evnt = friendEvents[j]; 
         const evntStart = evnt.getFirstPropertyValue("dtstart").toString();
@@ -235,17 +224,6 @@ const MyWidget = () => {
     return times;
   }
 
-
-/*
-  function switchFormat(events) {
-    // currently events are per person. we want to order by start time.
-    const allEvents = [];
-    events.map(
-
-  }*/
-
-
-  
 return (
   <div className= "widget max-w-4xl bg-gradient-to-r  from-emerald-900 via-indigo-700 to-blue-800 mx-auto p-6 bg-gray-900 text-white rounded-lg shadow-lg hover:shadow-xl focus:ring-4 focus:ring-blue-300" >
       <div className="max-h-400 p-4 bg-gray-900 rounded-lg mt-4">
