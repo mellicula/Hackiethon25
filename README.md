@@ -1,5 +1,16 @@
 # 🏆 Hackiethon2025 Widget Challenge
 
+## My Widget
+This is a widget to help coordinate catch-ups with your friends. You can easily upload everyone's calendar by downloading their ical subscription link as a .ics file. Pick a date, and the widget will tell you what time everyone is free!
+
+**external libraries**
+I used ical.js
+
+run 
+```npm install ical.js``` 
+to use this widget.
+
+
 ## 📌 Overview
 
 The **Hackiethon2025 Widget Challenge** is a coding competition aimed at enhancing students' enthusiasm for programming, strengthening their understanding of fundamental web development concepts, and fostering creativity and imagination.
