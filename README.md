@@ -4,7 +4,7 @@
 This is a widget to help coordinate catch-ups with your friends. You can easily upload everyone's calendar by downloading their ical subscription link as a .ics file. Pick a date, and the widget will tell you what time everyone is free!
 
 **external libraries**
-I used ical.js
+I used [ical.js](https://github.com/kewisch/ical.js)
 
 run 
 ```npm install ical.js``` 
